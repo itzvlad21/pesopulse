@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PesoPulse - Modern Finance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2933/2933116.png">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            var(--primary): #4f46e5;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --transfer: #8b5cf6;
+            --info: #0ea5e9;
+            
+            --bg-body: #f3f4f6;
+            --bg-card: #ffffff;
+            --text-main: #111827;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --input-bg: #f9fafb;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        body.dark-mode {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --text-main: #f9fafb;
+            --text-muted: #9ca3af;
+            --border-color: #374151;
+            --input-bg: #111827;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --primary: #6366f1;
+            --success: #34d399;
+            --danger: #f87171;
+        }
+
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 0; transition: background-color 0.3s, color 0.3s; }
+        .app-container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+        /* Top Navigation & Tabs */
+        .app-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 16px 24px; background: var(--bg-card); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+        .brand { display: flex; align-items: center; gap: 12px; font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .brand i { font-size: 1.8rem; }
+        .theme-toggle { background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1.2rem; transition: 0.2s; }
+        
+        .tabs-container { display: flex; gap: 12px; margin-bottom: 24px; overflow-x: auto; padding-bottom: 4px;}
+        .tab-btn { padding: 12px 24px; font-weight: 600; border-radius: 30px; border: none; cursor: pointer; transition: 0.2s; background: var(--bg-card); color: var(--text-muted); box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 8px;}
+        .tab-btn.active { background: var(--primary); color: white; }
+        .tab-btn:hover:not(.active) { background: var(--border-color); color: var(--text-main); }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Dashboard Grid */
+        .dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 24px; align-items: start; }
+
+        /* Cards & Sections */
+        .card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 24px; box-shadow: var(--shadow-sm); margin-bottom: 24px; border: 1px solid var(--border-color); }
+        .card-title { font-size: 1.1rem; font-weight: 600; margin-top: 0; margin-bottom: 20px; display: flex; align-items: center; gap: 8px; color: var(--text-main); }
+        .card-title i { color: var(--primary); font-size: 1.3rem; }
+
+        /* Balance Hero Card */
+        .balance-card { background: linear-gradient(135deg, var(--primary), #818cf8); color: white; border: none; position: relative; overflow: hidden; }
+        .balance-card::after { content: "\eb5b"; font-family: 'boxicons'; position: absolute; right: -20px; bottom: -30px; font-size: 10rem; opacity: 0.1; }
+        .balance-label { font-size: 0.9rem; font-weight: 500; opacity: 0.9; margin-bottom: 8px; }
+        .total-balance { font-size: 3rem; font-weight: 700; margin: 0; letter-spacing: -1px; }
+
+        /* Credit Card UI */
+        .cc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .cc-widget { background: linear-gradient(135deg, #1f2937, #374151); color: white; padding: 24px; border-radius: var(--radius-lg); position: relative; overflow: hidden; box-shadow: var(--shadow-md); }
+        .cc-widget::after { content: "\eba0"; font-family: 'boxicons'; position: absolute; right: -20px; top: -10px; font-size: 8rem; opacity: 0.05; }
+        .cc-name { font-size: 1.2rem; font-weight: 700; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;}
+        .cc-stats { display: flex; justify-content: space-between; margin-bottom: 12px; }
+        .cc-stat-box { display: flex; flex-direction: column; }
+        .cc-label { font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px;}
+        .cc-value { font-size: 1.2rem; font-weight: 600; }
+        .cc-progress { width: 100%; height: 8px; border-radius: 4px; background: rgba(255,255,255,0.2); margin-top: 10px; overflow: hidden;}
+        .cc-fill { height: 100%; background: var(--success); transition: width 0.5s;}
+        .cc-fill.danger { background: var(--danger); }
+        .cc-fill.warning { background: var(--warning); }
+
+        /* Accounts Grid */
+        .accounts-wrapper { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; }
+        .account-widget { padding: 16px; background: var(--input-bg); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        .account-name { font-size: 0.85rem; color: var(--text-muted); font-weight: 600; margin-bottom: 4px; display:flex; justify-content:space-between;}
+        .account-amount { font-size: 1.2rem; font-weight: 700; color: var(--text-main); }
+        .baseline-badge { display: block; font-size: 0.7rem; color: var(--info); margin-top: 6px; }
+
+        /* Forms & Inputs */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .full-width { grid-column: span 2; }
+        .input-group { position: relative; }
+        .input-group i { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 1.2rem; pointer-events: none; }
+        input, select { width: 100%; padding: 12px 12px 12px 40px; border: 1px solid var(--border-color); border-radius: var(--radius-md); font-size: 0.95rem; background: var(--input-bg); color: var(--text-main); box-sizing: border-box; font-family: inherit; appearance: none; }
+        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        button.btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: var(--radius-md); cursor: pointer; font-weight: 600; font-size: 1rem; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        button.btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-transfer { background: var(--transfer); } .btn-transfer:hover { background: #7c3aed; }
+        .btn-outline { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); } .btn-outline:hover { background: var(--input-bg); }
+        .btn-danger-small { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: none; border-radius: 6px; padding: 4px 8px; cursor: pointer; font-size: 0.8rem;}
+
+        /* Progress / Budget */
+        .budget-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.9rem; font-weight: 600; }
+        progress { width: 100%; height: 12px; border-radius: 6px; -webkit-appearance: none; appearance: none; margin-bottom: 8px;}
+        progress::-webkit-progress-bar { background-color: var(--border-color); border-radius: 6px; }
+        progress::-webkit-progress-value { background-color: var(--success); border-radius: 6px; transition: width 0.5s ease; }
+        progress.warning::-webkit-progress-value { background-color: var(--warning); }
+        progress.danger::-webkit-progress-value { background-color: var(--danger); }
+        
+        /* Transactions List */
+        .header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+        .search-container { position: relative; width: 250px; }
+        .search-container input { padding-left: 36px; padding-top: 8px; padding-bottom: 8px; border-radius: 20px;}
+        .search-container i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); }
+        
+        .transactions { list-style: none; padding: 0; margin: 0; }
+        .transaction-item { display: flex; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border-color); }
+        .transaction-item:last-child { border-bottom: none; }
+        .icon-circle { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; margin-right: 16px; flex-shrink: 0; }
+        .icon-income { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .icon-expense { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .icon-transfer { background: rgba(139, 92, 246, 0.1); color: var(--transfer); }
+        .transaction-details { flex-grow: 1; display: flex; flex-direction: column; }
+        .t-title { font-weight: 600; color: var(--text-main); font-size: 1rem; }
+        .t-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; display: flex; gap: 8px; align-items: center;}
+        .transaction-amount-wrapper { text-align: right; }
+        .t-amount { font-weight: 700; font-size: 1.1rem; }
+        .amount-in { color: var(--success); } .amount-out { color: var(--text-main); } .amount-transfer { color: var(--transfer); }
+        .delete-action { color: var(--text-muted); background: none; border: none; width: 32px; height: 32px; padding: 0; margin-left: 12px; border-radius: 50%; cursor: pointer; }
+        .delete-action:hover { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .chart-wrapper { position: relative; height: 250px; width: 100%; display: flex; justify-content: center; }
+        @media (max-width: 900px) { .dashboard-grid { grid-template-columns: 1fr; } .header-flex { flex-direction: column; align-items: flex-start; gap: 12px; } .search-container { width: 100%; } }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <header class="app-header">
+        <div class="brand"><i class='bx bx-wallet-alt'></i> PesoPulse</div>
+        <div style="display: flex; gap: 12px; align-items: center;">
+            <input type="month" id="filter-month" style="padding: 8px 12px; border-radius: 20px; font-weight: 600;">
+            <button class="theme-toggle" id="theme-toggle"><i class='bx bx-moon'></i></button>
+        </div>
+    </header>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab('tab-dashboard', this)"><i class='bx bx-home-alt'></i> Dashboard</button>
+        <button class="tab-btn" onclick="switchTab('tab-credit-cards', this)"><i class='bx bx-credit-card-front'></i> Credit Cards</button>
+    </div>
+
+    <div id="tab-dashboard" class="tab-content active">
+        <main class="dashboard-grid">
+            <div class="col-left">
+                <div class="card balance-card">
+                    <div class="balance-label">Total Net Worth</div>
+                    <h1 class="total-balance" id="total-balance">₱0.00</h1>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-layer'></i> Accounts Overview</h3>
+                    <div class="accounts-wrapper" id="accounts-grid"></div>
+                </div>
+
+                <div class="card">
+                    <div class="header-flex">
+                        <h3 class="card-title" style="margin:0;"><i class='bx bx-list-ul'></i> Recent Transactions</h3>
+                        <div class="search-container"><i class='bx bx-search'></i><input type="text" id="search-input" placeholder="Search history..."></div>
+                    </div>
+                    <ul class="transactions" id="transaction-list"></ul>
+                    <div style="margin-top: 16px;"><button class="btn btn-outline" onclick="exportToCSV()"><i class='bx bx-download'></i> Export CSV</button></div>
+                </div>
+            </div>
+
+            <div class="col-right">
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-plus-circle'></i> Add Transaction</h3>
+                    <form id="transaction-form" class="form-grid">
+                        <div class="input-group full-width"><i class='bx bx-pencil'></i><input type="text" id="desc" placeholder="What was this for?" required></div>
+                        <div class="input-group"><i class='bx bx-money'></i><input type="number" id="amount" placeholder="Amount" required min="1" step="0.01"></div>
+                        <div class="input-group"><i class='bx bx-calendar'></i><input type="date" id="date" required></div>
+                        <div class="input-group">
+                            <i class='bx bx-sort-alt-2'></i>
+                            <select id="type">
+                                <option value="expense">Expense (-)</option>
+                                <option value="income">Income (+)</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <i class='bx bx-category'></i>
+                            <select id="category">
+                                <option value="Food">Food & Dining</option>
+                                <option value="Transport">Transport</option>
+                                <option value="Bills">Bills & Utilities</option>
+                                <option value="Shopping">Shopping</option>
+                                <option value="Salary">Salary / Income</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="input-group full-width">
+                            <i class='bx bx-wallet'></i>
+                            <select id="account"></select>
+                        </div>
+                        <button type="submit" class="btn full-width"><i class='bx bx-save'></i> Save Transaction</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-transfer'></i> Transfer Funds / Pay Bills</h3>
+                    <form id="transfer-form" class="form-grid">
+                        <div class="input-group">
+                            <i class='bx bx-export'></i>
+                            <select id="transfer-from" required></select>
+                        </div>
+                        <div class="input-group">
+                            <i class='bx bx-import'></i>
+                            <select id="transfer-to" required></select>
+                        </div>
+                        <div class="input-group full-width"><i class='bx bx-money'></i><input type="number" id="transfer-amount" placeholder="Amount" required min="1" step="0.01"></div>
+                        <div class="input-group full-width"><i class='bx bx-calendar'></i><input type="date" id="transfer-date" required></div>
+                        <button type="submit" class="btn btn-transfer full-width"><i class='bx bx-check-circle'></i> Execute Transfer</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-pie-chart-alt-2'></i> Spending Analytics</h3>
+                    <div class="chart-wrapper"><canvas id="expenseChart"></canvas></div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-cog'></i> Starting Balances Setup</h3>
+                    <form id="balance-form" class="form-grid">
+                        <div class="input-group"><select id="balance-account"></select></div>
+                        <div class="input-group"><input type="number" id="starting-amount" placeholder="Amount" required min="0" step="0.01"></div>
+                        <button type="submit" class="btn full-width btn-outline">Set Baseline</button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="tab-credit-cards" class="tab-content">
+        <main class="dashboard-grid">
+            <div class="col-left">
+                <div class="card" style="background: transparent; border: none; box-shadow: none; padding: 0;">
+                    <h3 class="card-title" style="margin-bottom: 16px;"><i class='bx bx-credit-card'></i> My Credit Cards</h3>
+                    <div class="cc-grid" id="credit-cards-grid">
+                        </div>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-list-ul'></i> Credit Card History</h3>
+                    <ul class="transactions" id="cc-transaction-list">
+                        </ul>
+                </div>
+            </div>
+
+            <div class="col-right">
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-plus-circle'></i> Add New Credit Card</h3>
+                    <form id="add-cc-form" class="form-grid">
+                        <div class="input-group full-width">
+                            <i class='bx bx-credit-card-front'></i>
+                            <input type="text" id="cc-name" placeholder="Card Name (e.g., BPI Blue)" required>
+                        </div>
+                        <div class="input-group full-width">
+                            <i class='bx bx-target-lock'></i>
+                            <input type="number" id="cc-limit" placeholder="Credit Limit (e.g., 50000)" required min="1" step="0.01">
+                        </div>
+                        <button type="submit" class="btn full-width"><i class='bx bx-save'></i> Add Card</button>
+                    </form>
+                </div>
+                
+                <div class="card">
+                    <h3 class="card-title"><i class='bx bx-info-circle'></i> How Credit Cards Work</h3>
+                    <p style="font-size: 0.9rem; color: var(--text-muted); line-height: 1.5;">
+                        Credit cards track money you owe. When you log an <strong>Expense</strong> using a Credit Card, your "Owed Balance" goes up, and your "Available Credit" goes down.<br><br>
+                        When it is time to pay your bill, go to the Dashboard and log a <strong>Transfer</strong> from your Bank (e.g., BPI) to your Credit Card. This will pay off the owed balance without messing up your total expenses!
+                    </p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+</div>
+
+<script>
+    // --- STATE MANAGEMENT ---
+    let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
+    let startingBalances = JSON.parse(localStorage.getItem('startingBalances')) || { BPI: 0, GCash: 0, Cash: 0, PayPal: 0, GoTyme: 0, PayMaya: 0 };
+    // New Credit Card Array
+    let creditCards = JSON.parse(localStorage.getItem('creditCards')) || [];
+    
+    // Base Accounts + Dynamic Credit Cards
+    const baseAccounts = ["BPI", "GCash", "Cash", "PayPal", "GoTyme", "PayMaya"];
+    let expenseChartInstance = null;
+
+    // --- INITIALIZATION ---
+    const today = new Date();
+    document.getElementById('date').valueAsDate = today;
+    document.getElementById('transfer-date').valueAsDate = today;
+    const filterMonthEl = document.getElementById('filter-month');
+    if (!filterMonthEl.value) filterMonthEl.value = today.toISOString().slice(0, 7); 
+    
+    const searchInput = document.getElementById('search-input');
+    filterMonthEl.addEventListener('change', init);
+    searchInput.addEventListener('input', init);
+
+    // Theme Logic
+    let isDarkMode = localStorage.getItem('darkMode') === 'true';
+    const themeToggleBtn = document.getElementById('theme-toggle');
+    if (isDarkMode) { document.body.classList.add('dark-mode'); themeToggleBtn.innerHTML = "<i class='bx bx-sun'></i>"; }
+    themeToggleBtn.addEventListener('click', () => {
+        isDarkMode = !isDarkMode; document.body.classList.toggle('dark-mode', isDarkMode);
+        themeToggleBtn.innerHTML = isDarkMode ? "<i class='bx bx-sun'></i>" : "<i class='bx bx-moon'></i>";
+        localStorage.setItem('darkMode', isDarkMode); init(); 
+    });
+
+    // --- TAB SWITCHING ---
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    // --- DYNAMIC DROPDOWNS ---
+    function populateDropdowns() {
+        const allAccounts = [...baseAccounts, ...creditCards.map(c => c.name)];
+        const selects = ['account', 'transfer-from', 'transfer-to', 'balance-account'];
+        
+        selects.forEach(id => {
+            const el = document.getElementById(id);
+            const currentVal = el.value; // Save selection
+            el.innerHTML = '';
+            allAccounts.forEach(acc => {
+                const opt = document.createElement('option');
+                opt.value = acc;
+                opt.innerText = acc;
+                el.appendChild(opt);
+            });
+            if (currentVal && allAccounts.includes(currentVal)) el.value = currentVal;
+        });
+    }
+
+    // --- MAIN INIT FUNCTION ---
+    function init() {
+        populateDropdowns();
+        
+        const accountsGridEl = document.getElementById('accounts-grid');
+        const listEl = document.getElementById('transaction-list');
+        const ccListEl = document.getElementById('cc-transaction-list');
+        const ccGridEl = document.getElementById('credit-cards-grid');
+        
+        listEl.innerHTML = ''; ccListEl.innerHTML = ''; accountsGridEl.innerHTML = ''; ccGridEl.innerHTML = '';
+        
+        let totalNetWorth = 0;
+        let accountBalances = { ...startingBalances };
+        
+        const allAccounts = [...baseAccounts, ...creditCards.map(c => c.name)];
+        allAccounts.forEach(acc => { if (accountBalances[acc] === undefined) accountBalances[acc] = 0; });
+
+        // Calculate Balances
+        transactions.forEach(t => {
+            const amt = parseFloat(t.amount);
+            if (t.type === 'income') { accountBalances[t.account] += amt; totalNetWorth += amt; }
+            else if (t.type === 'expense') { accountBalances[t.account] -= amt; totalNetWorth -= amt; }
+            else if (t.type === 'transfer') { accountBalances[t.fromAccount] -= amt; accountBalances[t.toAccount] += amt; }
+        });
+
+        // Credit Cards are DEBT, so they do NOT add to Net Worth if positive limit. 
+        // We only deduct owed money from total net worth.
+        creditCards.forEach(c => {
+            // A negative balance means you owe money.
+            if (accountBalances[c.name] < 0) {
+                totalNetWorth += accountBalances[c.name]; // Adds a negative (deducts)
+            }
+        });
+
+        document.getElementById('total-balance').innerText = `₱${totalNetWorth.toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
+        // Render Standard Account Widgets (Hide Credit Cards from the standard Dashboard view)
+        baseAccounts.forEach(acc => {
+            const div = document.createElement('div');
+            div.classList.add('account-widget');
+            let accIcon = 'bx-credit-card';
+            if(acc === 'Cash') accIcon = 'bx-money'; else if(acc === 'GCash' || acc === 'PayPal' || acc === 'PayMaya') accIcon = 'bx-mobile'; else if(acc === 'GoTyme') accIcon = 'bx-buildings';
+            let baseAmt = startingBalances[acc] !== undefined ? startingBalances[acc] : 0;
+            div.innerHTML = `<div class="account-name"><span>${acc}</span> <i class='bx ${accIcon}'></i></div><div class="account-amount">₱${accountBalances[acc].toLocaleString(undefined, {minimumFractionDigits: 2})}</div><span class="baseline-badge">Base: ₱${baseAmt.toLocaleString()}</span>`;
+            accountsGridEl.appendChild(div);
+        });
+
+        // Render Credit Card Widgets in the CC Tab
+        if(creditCards.length === 0) {
+            ccGridEl.innerHTML = `<div style="color: var(--text-muted); padding: 20px;">No credit cards added yet. Add one on the right!</div>`;
+        } else {
+            creditCards.forEach(card => {
+                const limit = parseFloat(card.limit);
+                // Balance is usually negative if owed. Absolute value is what we owe.
+                const rawBalance = accountBalances[card.name]; 
+                const owed = rawBalance < 0 ? Math.abs(rawBalance) : 0; 
+                // If rawBalance is positive, we overpaid. Available is limit + overpayment.
+                const available = limit + rawBalance; 
+                
+                const percentUsed = (owed / limit) * 100;
+                let barClass = 'cc-fill';
+                if(percentUsed > 85) barClass += ' danger'; else if(percentUsed > 50) barClass += ' warning';
+
+                const div = document.createElement('div');
+                div.classList.add('cc-widget');
+                div.innerHTML = `
+                    <div class="cc-name"><span>${card.name}</span> <button class="btn-danger-small" onclick="removeCC('${card.name}')"><i class='bx bx-trash'></i></button></div>
+                    <div class="cc-stats">
+                        <div class="cc-stat-box"><span class="cc-label">Owed Balance</span><span class="cc-value" style="color: #fca5a5;">₱${owed.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
+                        <div class="cc-stat-box" style="text-align:right;"><span class="cc-label">Available Limit</span><span class="cc-value" style="color: #6ee7b7;">₱${available.toLocaleString(undefined, {minimumFractionDigits: 2})}</span></div>
+                    </div>
+                    <div class="cc-progress"><div class="${barClass}" style="width: ${Math.min(percentUsed, 100)}%;"></div></div>
+                    <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 8px; text-align: center;">Total Limit: ₱${limit.toLocaleString()}</div>
+                `;
+                ccGridEl.appendChild(div);
+            });
+        }
+
+        // Transactions Filtering
+        const selectedMonth = filterMonthEl.value; 
+        const searchTerm = searchInput.value.toLowerCase();
+        const ccNames = creditCards.map(c => c.name);
+
+        const monthlyTx = transactions.filter(t => t.date && t.date.substring(0, 7) === selectedMonth);
+        
+        // Filter for Main Dashboard (Search enabled)
+        const dashboardTx = monthlyTx.filter(t => t.desc.toLowerCase().includes(searchTerm) || t.category?.toLowerCase().includes(searchTerm) || t.account?.toLowerCase().includes(searchTerm));
+        if (dashboardTx.length === 0) listEl.innerHTML = '<li style="text-align:center; padding: 20px; color: var(--text-muted);">No records found.</li>';
+        else dashboardTx.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(t => addTransactionDOM(t, listEl));
+
+        // Filter for CC Tab (Only show transactions involving a credit card)
+        const cardTx = monthlyTx.filter(t => ccNames.includes(t.account) || ccNames.includes(t.fromAccount) || ccNames.includes(t.toAccount));
+        if (cardTx.length === 0) ccListEl.innerHTML = '<li style="text-align:center; padding: 20px; color: var(--text-muted);">No credit card activity this month.</li>';
+        else cardTx.sort((a, b) => new Date(b.date) - new Date(a.date)).forEach(t => addTransactionDOM(t, ccListEl));
+
+        updateChart(monthlyTx);
+    }
+
+    // --- FORM SUBMISSIONS ---
+    document.getElementById('add-cc-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('cc-name').value;
+        const limit = document.getElementById('cc-limit').value;
+        if(creditCards.find(c => c.name.toLowerCase() === name.toLowerCase())) { alert("Card already exists!"); return; }
+        creditCards.push({ name, limit: parseFloat(limit) });
+        localStorage.setItem('creditCards', JSON.stringify(creditCards));
+        init();
+        document.getElementById('cc-name').value = ''; document.getElementById('cc-limit').value = '';
+    });
+
+    document.getElementById('balance-form').addEventListener('submit', (e) => { e.preventDefault(); startingBalances[document.getElementById('balance-account').value] = parseFloat(document.getElementById('starting-amount').value); localStorage.setItem('startingBalances', JSON.stringify(startingBalances)); init(); document.getElementById('starting-amount').value = ''; });
+    document.getElementById('transfer-form').addEventListener('submit', (e) => { e.preventDefault(); const fromAcc = document.getElementById('transfer-from').value, toAcc = document.getElementById('transfer-to').value; if (fromAcc === toAcc) { alert("Cannot transfer to same account."); return; } transactions.push({ id: Math.random(), desc: `Payment/Transfer to ${toAcc}`, amount: parseFloat(document.getElementById('transfer-amount').value), date: document.getElementById('transfer-date').value, type: 'transfer', fromAccount: fromAcc, toAccount: toAcc }); updateLocalStorage(); init(); document.getElementById('transfer-amount').value = ''; });
+    document.getElementById('transaction-form').addEventListener('submit', (e) => { e.preventDefault(); transactions.push({ id: Math.random(), desc: document.getElementById('desc').value, amount: +document.getElementById('amount').value, date: document.getElementById('date').value, type: document.getElementById('type').value, category: document.getElementById('category').value, account: document.getElementById('account').value }); updateLocalStorage(); init(); document.getElementById('desc').value = ''; document.getElementById('amount').value = ''; });
+
+    // --- HELPER FUNCTIONS ---
+    function removeCC(name) {
+        if(confirm(`Are you sure you want to delete ${name}? This will NOT delete its transaction history, but will remove the card from the tracking overview.`)) {
+            creditCards = creditCards.filter(c => c.name !== name);
+            localStorage.setItem('creditCards', JSON.stringify(creditCards));
+            init();
+        }
+    }
+
+    function addTransactionDOM(t, containerEl) {
+        const item = document.createElement('li');
+        item.classList.add('transaction-item');
+        let iconBg = '', amtClass = '', sign = '', bxIcon = 'bx-coin';
+        const iconMap = { 'Food': 'bx-restaurant', 'Transport': 'bx-car', 'Bills': 'bx-receipt', 'Shopping': 'bx-shopping-bag', 'Salary': 'bx-wallet', 'Other': 'bx-dots-horizontal-rounded' };
+        
+        if (t.type === 'income') { iconBg = 'icon-income'; amtClass = 'amount-in'; sign = '+'; if (t.category && iconMap[t.category]) bxIcon = iconMap[t.category]; } 
+        else if (t.type === 'expense') { iconBg = 'icon-expense'; amtClass = 'amount-out'; sign = '-'; if (t.category && iconMap[t.category]) bxIcon = iconMap[t.category]; } 
+        else if (t.type === 'transfer') { bxIcon = 'bx-transfer'; iconBg = 'icon-transfer'; amtClass = 'amount-transfer'; sign = ''; }
+
+        const dateStr = new Date(t.date).toLocaleDateString('en-US', {month: 'short', day: 'numeric'});
+        const accInfo = t.type === 'transfer' ? `${t.fromAccount} → ${t.toAccount}` : t.account;
+
+        item.innerHTML = `<div class="icon-circle ${iconBg}"><i class='bx ${bxIcon}'></i></div>
+            <div class="transaction-details">
+                <span class="t-title">${t.desc}</span>
+                <span class="t-meta"><i class='bx bx-calendar-alt'></i> ${dateStr} <i class='bx bx-folder'></i> ${t.type === 'transfer' ? 'Transfer' : t.category} <i class='bx bx-credit-card'></i> ${accInfo}</span>
+            </div>
+            <div class="transaction-amount-wrapper"><div class="t-amount ${amtClass}">${sign}₱${parseFloat(t.amount).toLocaleString(undefined, {minimumFractionDigits: 2})}</div></div>
+            <button class="delete-action" onclick="removeTransaction(${t.id})" title="Delete"><i class='bx bx-trash'></i></button>`;
+        containerEl.appendChild(item);
+    }
+
+    function removeTransaction(id) { transactions = transactions.filter(t => t.id !== id); updateLocalStorage(); init(); }
+    function updateLocalStorage() { localStorage.setItem('transactions', JSON.stringify(transactions)); }
+
+    function updateChart(monthlyTransactions) {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        if (expenseChartInstance) expenseChartInstance.destroy();
+        const expenses = monthlyTransactions.filter(t => t.type === 'expense');
+        const categoryTotals = {};
+        expenses.forEach(t => { const cat = t.category || 'Other'; categoryTotals[cat] = (categoryTotals[cat] || 0) + parseFloat(t.amount); });
+        Chart.defaults.color = isDarkMode ? '#9ca3af' : '#6b7280'; Chart.defaults.font.family = "'Inter', sans-serif";
+        if (Object.keys(categoryTotals).length === 0) return;
+        expenseChartInstance = new Chart(ctx, { type: 'doughnut', data: { labels: Object.keys(categoryTotals), datasets: [{ data: Object.values(categoryTotals), backgroundColor: ['#ef4444', '#3b82f6', '#f59e0b', '#8b5cf6', '#10b981', '#6b7280'], borderWidth: 0, hoverOffset: 4 }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right', labels: { boxWidth: 12, usePointStyle: true } } }, cutout: '70%' } });
+    }
+
+    function exportToCSV() {
+        if (transactions.length === 0) { alert("No transactions to export."); return; }
+        let csvContent = "data:text/csv;charset=utf-8,Date,Type,Description,Category,From Account,To Account,Amount\n";
+        transactions.forEach(t => { csvContent += `${t.date || ''},${t.type},"${(t.desc || '').replace(/"/g, '""')}",${t.category || 'N/A'},${t.type === 'transfer' ? t.fromAccount : t.account},${t.type === 'transfer' ? t.toAccount : 'N/A'},${t.amount}\n`; });
+        const encodedUri = encodeURI(csvContent), link = document.createElement("a"); link.setAttribute("href", encodedUri); link.setAttribute("download", "PesoPulse_Export.csv"); document.body.appendChild(link); link.click(); document.body.removeChild(link);
+    }
+
+    init();
+</script>
+</body>
+</html>
