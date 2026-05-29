@@ -306,12 +306,12 @@
 <script>
     // --- STATE MANAGEMENT ---
     let transactions = JSON.parse(localStorage.getItem('transactions')) || [];
-    let startingBalances = JSON.parse(localStorage.getItem('startingBalances')) || { BPI: 0, GCash: 0, Cash: 0, PayPal: 0, GoTyme: 0, PayMaya: 0 };
+    let startingBalances = JSON.parse(localStorage.getItem('startingBalances')) || { BPI: 0, GCash: 0, Cash: 0, PayPal: 0, GoTyme: 0, UnionBank: 0 };
     // New Credit Card Array
     let creditCards = JSON.parse(localStorage.getItem('creditCards')) || [];
     
     // Base Accounts + Dynamic Credit Cards
-    const baseAccounts = ["BPI", "GCash", "Cash", "PayPal", "GoTyme", "PayMaya"];
+    const baseAccounts = ["BPI", "GCash", "Cash", "PayPal", "GoTyme", "UnionBank"];
     let expenseChartInstance = null;
 
     // --- INITIALIZATION ---
@@ -403,7 +403,7 @@
             const div = document.createElement('div');
             div.classList.add('account-widget');
             let accIcon = 'bx-credit-card';
-            if(acc === 'Cash') accIcon = 'bx-money'; else if(acc === 'GCash' || acc === 'PayPal' || acc === 'PayMaya') accIcon = 'bx-mobile'; else if(acc === 'GoTyme') accIcon = 'bx-buildings';
+            if(acc === 'Cash') accIcon = 'bx-money'; else if(acc === 'GCash' || acc === 'PayPal' || acc === 'UnionBank') accIcon = 'bx-mobile'; else if(acc === 'GoTyme') accIcon = 'bx-buildings';
             let baseAmt = startingBalances[acc] !== undefined ? startingBalances[acc] : 0;
             div.innerHTML = `<div class="account-name"><span>${acc}</span> <i class='bx ${accIcon}'></i></div><div class="account-amount">₱${accountBalances[acc].toLocaleString(undefined, {minimumFractionDigits: 2})}</div><span class="baseline-badge">Base: ₱${baseAmt.toLocaleString()}</span>`;
             accountsGridEl.appendChild(div);
